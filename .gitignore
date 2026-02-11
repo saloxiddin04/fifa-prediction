@@ -57,10 +57,6 @@ frontend/.pnpm-debug.log*
 models/*.pkl
 !models/.gitkeep
 
-# Dataset (agar katta bo'lsa)
-*.csv
-!FIFA-2019.csv  # Agar kichik bo'lsa, tracking qilish mumkin
-
 # Logs
 logs/
 *.log
