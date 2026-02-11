@@ -1,0 +1,549 @@
+/* Tailwind CSS v4 - FIFA Prediction Frontend */
+@import 'tailwindcss';
+
+/* Custom theme variables */
+@theme {
+  /* FIFA Brand Colors - Screenshotga mos */
+  --color-fifa-blue: #0D47A1;        /* To'q ko'k - header va buttonlar */
+  --color-fifa-blue-light: #1565C0;
+  --color-fifa-blue-dark: #0A3A7A;
+
+  --color-fifa-green: #2E7D32;        /* To'q yashil - accuracy */
+  --color-fifa-green-light: #4CAF50;
+  --color-fifa-green-dark: #1B5E20;
+
+  --color-fifa-gold: #FFC107;         /* Sariq - badge */
+  --color-fifa-silver: #9E9E9E;
+  --color-fifa-bronze: #8D6E63;
+
+  /* Status colors */
+  --color-success: #2E7D32;           /* Yashil - yuqori aniqlik */
+  --color-warning: #FF9800;           /* Orange - o'rtacha aniqlik */
+  --color-error: #D32F2F;            /* Qizil - past aniqlik */
+
+  /* Background colors */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F5F7FA;
+  --color-bg-card: #FFFFFF;
+  --color-bg-hover: #EEF2F6;
+
+  /* Text colors */
+  --color-text-primary: #1E293B;      /* To'q kulrang - asosiy matn */
+  --color-text-secondary: #64748B;    /* Och kulrang - ikkinchi darajali matn */
+  --color-text-muted: #94A3B8;       /* Eng och matn */
+  --color-text-white: #FFFFFF;
+
+  /* Border colors */
+  --color-border: #E2E8F0;
+  --color-border-light: #F1F5F9;
+
+  /* Position colors */
+  --color-position-forward: #DC2626;   /* Qizil */
+  --color-position-winger: #EA580C;    /* To'q sariq */
+  --color-position-midfielder: #16A34A; /* Yashil */
+  --color-position-defensive-mid: #0D9488; /* Ko'k-yashil */
+  --color-position-center-back: #2563EB; /* Ko'k */
+  --color-position-full-back: #4F46E5;  /* Indigo */
+  --color-position-goalkeeper: #7C3AED;  /* Binafsha */
+
+  /* Level colors */
+  --color-level-elite: #F59E0B;        /* Amber */
+  --color-level-gold: #D97706;         /* To'q sariq */
+  --color-level-silver: #6B7280;       /* Kulrang */
+  --color-level-bronze: #B45309;       /* Jigarrang */
+
+  /* Accuracy colors */
+  --color-accuracy-high: #2E7D32;      /* Yashil - 70%+ */
+  --color-accuracy-medium: #ED6C02;    /* Sariq - 50-70% */
+  --color-accuracy-low: #D32F2F;       /* Qizil - 50%- */
+
+  /* Typography */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Border radius */
+  --radius-card: 1rem;
+  --radius-button: 0.5rem;
+  --radius-badge: 9999px;
+  --radius-stat: 0.75rem;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-card-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-dropdown: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.3s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    0% { transform: translateY(10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+}
+
+/* Base styles */
+@layer base {
+  html {
+    font-family: var(--font-family-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-text-muted);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-secondary);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* Cards */
+  .card {
+    background-color: var(--color-bg-card);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 1.5rem;
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+    border: 1px solid var(--color-border-light);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-border);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    padding-inline: 1.25rem;
+    padding-block: 0.625rem;
+    background-color: var(--color-fifa-blue);
+    color: var(--color-text-white);
+    border-radius: var(--radius-button);
+    font-weight: 600;
+    font-size: 0.875rem;
+    box-shadow: var(--shadow-card);
+    transition-property: all;
+    transition-duration: 200ms;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-fifa-blue-dark);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-secondary {
+    padding-inline: 1.25rem;
+    padding-block: 0.625rem;
+    background-color: white;
+    color: var(--color-text-primary);
+    border-radius: var(--radius-button);
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid var(--color-border);
+    transition-property: all;
+    transition-duration: 200ms;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-bg-hover);
+    border-color: var(--color-text-muted);
+  }
+
+  /* Stats cards */
+  .stat-card {
+    background: linear-gradient(145deg, white, var(--color-bg-secondary));
+    border-radius: var(--radius-stat);
+    padding: 1rem;
+    border: 1px solid var(--color-border-light);
+  }
+
+  .stat-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Accuracy badges */
+  .accuracy-badge {
+    padding-inline: 0.625rem;
+    padding-block: 0.25rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .accuracy-high {
+    background-color: #E8F5E9;
+    color: var(--color-accuracy-high);
+  }
+
+  .accuracy-medium {
+    background-color: #FFF3E0;
+    color: var(--color-accuracy-medium);
+  }
+
+  .accuracy-low {
+    background-color: #FFEBEE;
+    color: var(--color-accuracy-low);
+  }
+
+  /* Range slider */
+  .input-range {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #E2E8F0;
+    border-radius: 0.5rem;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .input-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: white;
+    border: 2px solid var(--color-fifa-blue);
+    border-radius: 9999px;
+    box-shadow: var(--shadow-card);
+    transition-property: all;
+    transition-duration: 200ms;
+    cursor: pointer;
+  }
+
+  .input-range::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    background-color: var(--color-fifa-blue);
+    border-color: white;
+  }
+
+  /* Position badges */
+  .position-badge {
+    padding-inline: 0.75rem;
+    padding-block: 0.375rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    letter-spacing: 0.025em;
+  }
+
+  .position-forward {
+    background-color: #FEE2E2;
+    color: #991B1B;
+  }
+
+  .position-winger {
+    background-color: #FFF3E0;
+    color: #9A3412;
+  }
+
+  .position-midfielder {
+    background-color: #E8F5E9;
+    color: #065F46;
+  }
+
+  .position-defensive-mid {
+    background-color: #E0F2F1;
+    color: #115E59;
+  }
+
+  .position-center-back {
+    background-color: #EFF6FF;
+    color: #1E40AF;
+  }
+
+  .position-full-back {
+    background-color: #EEF2FF;
+    color: #3730A3;
+  }
+
+  .position-goalkeeper {
+    background-color: #F3E8FF;
+    color: #5B21B6;
+  }
+
+  /* Level badges */
+  .level-badge {
+    padding-inline: 0.625rem;
+    padding-block: 0.25rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .level-elite {
+    background-color: #FEF3C7;
+    color: #92400E;
+  }
+
+  .level-gold {
+    background-color: #FEF3C7;
+    color: #B45309;
+  }
+
+  .level-silver {
+    background-color: #F3F4F6;
+    color: #1F2937;
+  }
+
+  .level-bronze {
+    background-color: #FFEDD5;
+    color: #7C2D12;
+  }
+
+  /* Model info */
+  .model-info {
+    background: linear-gradient(135deg, var(--color-bg-card), var(--color-bg-secondary));
+    border-radius: var(--radius-stat);
+    padding: 1.25rem;
+  }
+
+  .model-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .model-accuracy {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-fifa-green);
+  }
+
+  /* Feature sliders */
+  .feature-item {
+    padding: 0.75rem;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-stat);
+    transition-property: all;
+    transition-duration: 200ms;
+  }
+
+  .feature-item:hover {
+    background-color: var(--color-bg-hover);
+  }
+
+  .feature-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .feature-description {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+
+  .feature-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-fifa-blue);
+    background-color: rgba(13, 71, 161, 0.1);
+    padding-inline: 0.5rem;
+    padding-block: 0.25rem;
+    border-radius: 0.375rem;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-fifa-blue), var(--color-fifa-blue-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--color-fifa-blue), var(--color-fifa-blue-dark));
+    color: white;
+    padding-block: 1rem;
+    padding-inline: 1.5rem;
+    box-shadow: var(--shadow-dropdown);
+  }
+
+  /* Footer */
+  .footer {
+    background-color: white;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    padding-block: 1.5rem;
+  }
+
+  /* Loading spinner */
+  .loading-spinner {
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-fifa-blue);
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+/* Text colors - visibility fix */
+.text-primary {
+  color: var(--color-text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--color-text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.text-white {
+  color: var(--color-text-white) !important;
+}
+
+/* Background colors */
+.bg-primary {
+  background-color: var(--color-fifa-blue) !important;
+}
+
+.bg-success {
+  background-color: var(--color-success) !important;
+}
+
+.bg-warning {
+  background-color: var(--color-warning) !important;
+}
+
+.bg-error {
+  background-color: var(--color-error) !important;
+}
+
+/* Dark mode - Tailwind v4 uslubida */
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-bg-primary: #0F172A;
+    --color-bg-secondary: #1E293B;
+    --color-bg-card: #1E293B;
+    --color-bg-hover: #334155;
+    --color-text-primary: #F1F5F9;
+    --color-text-secondary: #CBD5E1;
+    --color-text-muted: #94A3B8;
+    --color-border: #334155;
+    --color-border-light: #1E293B;
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+  }
+
+  .card {
+    background-color: var(--color-bg-card);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-bg-hover);
+  }
+
+  .feature-item {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .feature-item:hover {
+    background-color: var(--color-bg-hover);
+  }
+
+  .stat-card {
+    background: linear-gradient(145deg, var(--color-bg-card), var(--color-bg-secondary));
+  }
+}
+
+/* Utility classes */
+.container-custom {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    padding-inline: 2rem;
+  }
+}
