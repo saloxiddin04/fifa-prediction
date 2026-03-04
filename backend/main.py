@@ -261,10 +261,10 @@ async def predict(request: PredictionRequest):
             scaled_features = field_scaler.transform(features_array)
 
             # Predict
-            prediction_idx = field_model.predict(scaled_features)[0]   # indeks (int)
+            prediction_idx = field_model.predict(scaled_features)[0]
             probabilities = field_model.predict_proba(scaled_features)[0]
 
-            # Decode position (matn)
+            # Decode position
             position = label_encoder.inverse_transform([prediction_idx])[0]
 
             # Get top 3 predictions
@@ -281,8 +281,13 @@ async def predict(request: PredictionRequest):
             prob_dict = dict(zip(label_encoder.classes_, probabilities))
             prob_of_predicted = prob_dict[position]
 
-            # Key features
-            key_features = field_position_features.get(position, field_features[:5])
+            # ===== YANGI: O'YINCHINING KUCHLI TOMONLARI =====
+            # Featurelar va ularning qiymatlarini juftlash
+            player_features = dict(zip(field_features, request.features))
+
+            # Eng yuqori 5 atributni topish (qiymati bo'yicha)
+            sorted_features = sorted(player_features.items(), key=lambda x: x[1], reverse=True)
+            top_strengths = [{"name": feat, "value": round(val, 1)} for feat, val in sorted_features[:5]]
 
             response = {
                 "player_type": "field",
@@ -291,7 +296,8 @@ async def predict(request: PredictionRequest):
                 "confidence": "high" if prob_of_predicted > 0.7 else "medium" if prob_of_predicted > 0.5 else "low",
                 "top_predictions": top_predictions,
                 "all_probabilities": dict(zip(label_encoder.classes_, [float(p) for p in probabilities])),
-                "key_features": key_features
+                "player_strengths": top_strengths,  # <-- KUCHLI TOMONLAR
+                "all_features": player_features      # <-- ISTASA HAMMA FEATURELAR
             }
 
         elif request.type == "gk":
@@ -302,7 +308,7 @@ async def predict(request: PredictionRequest):
             features_array = np.array(request.features).reshape(1, -1)
             scaled_features = gk_scaler.transform(features_array)
 
-            # Predict (to'g'ridan-to'g'ri klass nomi – masalan 'Elite')
+            # Predict
             predicted_level = gk_model.predict(scaled_features)[0]
             probabilities = gk_model.predict_proba(scaled_features)[0]
 
@@ -320,8 +326,13 @@ async def predict(request: PredictionRequest):
             prob_dict = dict(zip(gk_model.classes_, probabilities))
             prob_of_predicted = prob_dict[predicted_level]
 
-            # Key features
-            key_features = gk_level_features.get(predicted_level, gk_features[:5])
+            # ===== YANGI: DARVOZABONNING KUCHLI TOMONLARI =====
+            # Featurelar va ularning qiymatlarini juftlash
+            player_features = dict(zip(gk_features, request.features))
+
+            # Eng yuqori 5 atributni topish (qiymati bo'yicha)
+            sorted_features = sorted(player_features.items(), key=lambda x: x[1], reverse=True)
+            top_strengths = [{"name": feat, "value": round(val, 1)} for feat, val in sorted_features[:5]]
 
             response = {
                 "player_type": "goalkeeper",
@@ -330,7 +341,8 @@ async def predict(request: PredictionRequest):
                 "confidence": "high" if prob_of_predicted > 0.7 else "medium" if prob_of_predicted > 0.5 else "low",
                 "top_predictions": top_predictions,
                 "all_probabilities": dict(zip(gk_model.classes_, [float(p) for p in probabilities])),
-                "key_features": key_features
+                "player_strengths": top_strengths,  # <-- KUCHLI TOMONLAR
+                "all_features": player_features      # <-- ISTASA HAMMA FEATURELAR
             }
 
         else:

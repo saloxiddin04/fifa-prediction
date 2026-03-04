@@ -68,7 +68,7 @@ const StatsPanel = () => {
 
       {/* Last Updated */}
       {lastUpdated && (
-        <div className="text-xs text-gray-500 mb-4 flex items-center">
+        <div className="text-xs text-gray-400 mb-4 flex items-center">
           <FaInfoCircle className="mr-1" />
           Last updated: {lastUpdated}
         </div>
@@ -78,7 +78,7 @@ const StatsPanel = () => {
       <div className="mb-8">
         <div className="flex items-center mb-4">
           <FaCogs className="text-fifa-green mr-2" />
-          <h4 className="font-medium text-gray-700">Field Player Model</h4>
+          <h4 className="font-medium text-gray-400">Field Player Model</h4>
           <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded">
             {stats.field_model?.accuracy_percentage || 0}% ACC
           </span>
@@ -102,7 +102,7 @@ const StatsPanel = () => {
         
         <div className="mb-3">
           <div className="flex justify-between mb-1">
-            <span className="text-sm text-gray-600">Accuracy</span>
+            <span className="text-sm text-gray-400">Accuracy</span>
             <span className="text-sm font-bold text-fifa-blue">
               {(stats.field_model?.accuracy_percentage || 0).toFixed(1)}%
             </span>
@@ -122,7 +122,7 @@ const StatsPanel = () => {
       <div className="mb-8">
         <div className="flex items-center mb-4">
           <FaDatabase className="text-fifa-green mr-2" />
-          <h4 className="font-medium text-gray-700">Goalkeeper Model</h4>
+          <h4 className="font-medium text-gray-400">Goalkeeper Model</h4>
           <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded">
             {stats.gk_model?.accuracy_percentage || 0}% ACC
           </span>
@@ -146,7 +146,7 @@ const StatsPanel = () => {
         
         <div className="mb-3">
           <div className="flex justify-between mb-1">
-            <span className="text-sm text-gray-600">Accuracy</span>
+            <span className="text-sm text-gray-400">Accuracy</span>
             <span className="text-sm font-bold text-purple-600">
               {(stats.gk_model?.accuracy_percentage || 0).toFixed(1)}%
             </span>
@@ -166,7 +166,7 @@ const StatsPanel = () => {
       <div className="pt-4 border-t border-gray-200">
         <div className="flex items-center mb-3">
           <FaUsers className="text-fifa-blue mr-2" />
-          <h4 className="font-medium text-gray-700">Overall Statistics</h4>
+          <h4 className="font-medium text-gray-400">Overall Statistics</h4>
         </div>
         
         <div className="grid grid-cols-3 gap-2">
@@ -203,7 +203,7 @@ const StatsPanel = () => {
         <div className="space-y-3">
           <div>
             <div className="flex justify-between mb-1">
-              <span className="text-sm text-gray-600">Field Model</span>
+              <span className="text-sm text-gray-400">Field Model</span>
               <span className="text-sm font-bold">
                 {(stats.field_model?.accuracy_percentage || 0).toFixed(1)}%
               </span>
@@ -218,7 +218,7 @@ const StatsPanel = () => {
           
           <div>
             <div className="flex justify-between mb-1">
-              <span className="text-sm text-gray-600">GK Model</span>
+              <span className="text-sm text-gray-400">GK Model</span>
               <span className="text-sm font-bold">
                 {(stats.gk_model?.accuracy_percentage || 0).toFixed(1)}%
               </span>

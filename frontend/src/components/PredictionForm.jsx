@@ -140,13 +140,6 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
     }
   };
 
-  const getPositionColor = (position) => {
-    if (position.includes('Forward')) return 'bg-red-100 text-red-800';
-    if (position.includes('Midfielder')) return 'bg-green-100 text-green-800';
-    if (position.includes('Defender') || position.includes('Back')) return 'bg-blue-100 text-blue-800';
-    return 'bg-gray-100 text-gray-800';
-  };
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -158,14 +151,14 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
         <div className="flex items-center">
           <FaFutbol className="text-3xl text-fifa-blue mr-3" />
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Player Builder</h2>
-            <p className="text-gray-600">Adjust attributes and predict position</p>
+            <h2 className="text-2xl font-bold text-white">Player Builder</h2>
+            <p className="text-white">Adjust attributes and predict position</p>
           </div>
         </div>
         
         {modelInfo && (
           <div className="text-right">
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-white">
               <IoStatsChart className="mr-1" />
               <span className="font-semibold">
                 {playerType === 'field' 
@@ -180,7 +173,7 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
 
       {/* Player Type Selector */}
       <div className="mb-8">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-white mb-3">
           Select Player Type
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -220,7 +213,7 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
 
       {/* Sample Players */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-white mb-3">
           Quick Templates
         </label>
         <div className="flex flex-wrap gap-2">
@@ -240,7 +233,7 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
               key={sample}
               type="button"
               onClick={() => handleSampleSelect(sample)}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm capitalize transition-all"
+              className="px-4 py-2 text-black bg-gray-100 hover:bg-gray-200 rounded-lg text-sm capitalize transition-all"
             >
               {sample}
             </button>
@@ -271,7 +264,7 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
       {/* Features Form */}
       <form onSubmit={handleSubmit}>
         <div className="mb-8 max-h-[400px] overflow-y-auto pr-2">
-          <label className="block text-sm font-medium text-gray-700 mb-4">
+          <label className="block text-sm font-medium text-white mb-4">
             Player Attributes ({featureNames.length})
           </label>
           <div className="space-y-6">
@@ -279,9 +272,9 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
               <div key={index} className="space-y-2">
                 <div className="flex justify-between items-center">
                   <div>
-                    <span className="font-medium text-gray-700">{name}</span>
+                    <span className="font-medium text-white">{name}</span>
                     {featureDescriptions[name] && (
-                      <p className="text-xs text-gray-500">{featureDescriptions[name]}</p>
+                      <p className="text-xs text-gray-300">{featureDescriptions[name]}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
@@ -300,7 +293,7 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
                     onChange={(e) => handleFeatureChange(index, e.target.value)}
                     className="input-range"
                   />
-                  <div className="flex justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-xs text-gray-400">
                     <span>0 (Poor)</span>
                     <span>50 (Average)</span>
                     <span>100 (Excellent)</span>

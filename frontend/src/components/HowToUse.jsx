@@ -106,7 +106,7 @@ const HowToUse = ({ onClose }) => {
           {/* API Information */}
           <div className="mt-6 p-4 bg-blue-50 rounded-xl">
             <h4 className="font-bold text-blue-800 mb-2">API Endpoints</h4>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2 text-sm text-black">
               <code className="block bg-white p-2 rounded border">POST /api/predict</code>
               <code className="block bg-white p-2 rounded border">GET /api/stats</code>
               <code className="block bg-white p-2 rounded border">GET /api/features</code>
