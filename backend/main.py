@@ -406,6 +406,331 @@ async def get_samples():
         }
     }
 
+# ==================== POSITIONS ENDPOINT ====================
+@app.get("/api/positions")
+async def get_positions():
+    """CSV dan barcha pozitsiyalarni olish"""
+    try:
+        df = pd.read_csv("FIFA-2019.csv")
+
+        # Position ustunini olish va tozalash
+        all_positions = set()
+        for pos in df['Position'].dropna():
+            # Vergul bilan ajratilgan bo'lsa, birinchi pozitsiyani olamiz
+            main_pos = str(pos).split(',')[0].strip()
+            if main_pos and main_pos != 'nan' and main_pos != '':
+                all_positions.add(main_pos)
+
+        # Pozitsiyalarni tartiblash (GK birinchi, keyin boshqalar)
+        sorted_positions = sorted(list(all_positions))
+
+        # GK ni birinchi qilish
+        if 'GK' in sorted_positions:
+            sorted_positions.remove('GK')
+            sorted_positions.insert(0, 'GK')
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "data": sorted_positions
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading positions: {str(e)}")
+
+# ==================== PLAYER ENDPOINTS (TO'LIQ) ====================
+
+@app.get("/api/players")
+async def get_players(
+    search: Optional[str] = None,
+    position: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0
+):
+    """O'yinchilarni qidirish va filterlash (CSV dan)"""
+    try:
+        df = pd.read_csv("FIFA-2019.csv")
+
+        # Kerakli ustunlarni tanlash
+        players = df[['ID', 'Name', 'Age', 'Overall', 'Position', 'Club', 'Nationality', 'Photo', 'Flag']].copy()
+
+        # Position ni tozalash (asosiy pozitsiya)
+        players['MainPosition'] = players['Position'].apply(
+            lambda x: str(x).split(',')[0].strip() if pd.notnull(x) and str(x) != 'nan' else 'Unknown'
+        )
+
+        # Qidiruv filtri (name bo'yicha)
+        if search:
+            players = players[players['Name'].str.contains(search, case=False, na=False)]
+
+        # Pozitsiya filtri
+        if position and position != 'all' and position != '':
+            players = players[players['MainPosition'] == position]
+
+        # Null qiymatlarni tozalash
+        players = players.dropna(subset=['Name', 'Overall'])
+
+        # Umumiy soni
+        total_count = len(players)
+
+        # Overall bo'yicha tartiblash va limit/offset
+        players = players.nlargest(total_count, 'Overall')
+        players = players.iloc[offset:offset + limit]
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "total": total_count,
+            "limit": limit,
+            "offset": offset,
+            "data": players.to_dict(orient='records')
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading players: {str(e)}")
+
+@app.get("/api/players/top")
+async def get_top_players(limit: int = 100):
+    """Eng yaxshi o'yinchilarni olish (Overall bo'yicha)"""
+    try:
+        df = pd.read_csv("FIFA-2019.csv")
+
+        # Kerakli ustunlarni tanlash
+        players = df[['ID', 'Name', 'Age', 'Overall', 'Position', 'Club', 'Nationality', 'Photo']].copy()
+
+        # Position ni tozalash
+        players['MainPosition'] = players['Position'].apply(
+            lambda x: str(x).split(',')[0].strip() if pd.notnull(x) and str(x) != 'nan' else 'Unknown'
+        )
+
+        # Null qiymatlarni tozalash
+        players = players.dropna(subset=['Name', 'Overall'])
+
+        # Overall bo'yicha tartiblash va limit
+        players = players.nlargest(limit, 'Overall')
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "data": players.to_dict(orient='records')
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading top players: {str(e)}")
+
+@app.get("/api/players/position/{position}")
+async def get_players_by_position(position: str, limit: int = 50):
+    """Pozitsiya bo'yicha o'yinchilarni olish"""
+    try:
+        df = pd.read_csv("FIFA-2019.csv")
+
+        # Position ni tozalash
+        df['MainPosition'] = df['Position'].apply(
+            lambda x: str(x).split(',')[0].strip() if pd.notnull(x) and str(x) != 'nan' else 'Unknown'
+        )
+
+        # Pozitsiya bo'yicha filter
+        players = df[df['MainPosition'] == position]
+
+        # Kerakli ustunlarni tanlash
+        players = players[['ID', 'Name', 'Age', 'Overall', 'Position', 'Club', 'Nationality', 'Photo']].copy()
+
+        # Null qiymatlarni tozalash
+        players = players.dropna(subset=['Name', 'Overall'])
+
+        # Overall bo'yicha tartiblash va limit
+        players = players.nlargest(limit, 'Overall')
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "position": position,
+            "count": len(players),
+            "data": players.to_dict(orient='records')
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading players by position: {str(e)}")
+
+@app.post("/api/player-comparison")
+async def get_player_comparison(player_ids: List[int]):
+    """Tanlangan o'yinchilarning barcha featurelarini qaytaradi"""
+    try:
+        df = pd.read_csv("FIFA-2019.csv")
+
+        # Tanlangan o'yinchilarni olish
+        selected_players = df[df['ID'].isin(player_ids)]
+
+        if selected_players.empty:
+            raise HTTPException(status_code=404, detail="Players not found")
+
+        result = []
+        for _, player in selected_players.iterrows():
+            # Position ni aniqlash
+            position = str(player['Position']).split(',')[0].strip() if pd.notnull(player['Position']) and str(player['Position']) != 'nan' else 'Unknown'
+            player_type = "gk" if position == "GK" else "field"
+
+            # Featurelarni yig'ish
+            features = {}
+
+            if player_type == "field":
+                # Field featurelari
+                for feat in field_features:
+                    if feat in player.index and pd.notnull(player[feat]):
+                        try:
+                            features[feat] = float(player[feat])
+                        except:
+                            features[feat] = 50.0
+            else:
+                # GK featurelari
+                for feat in gk_features:
+                    if feat in player.index and pd.notnull(player[feat]):
+                        try:
+                            features[feat] = float(player[feat])
+                        except:
+                            features[feat] = 50.0
+
+            # Agar featurelar bo'lmasa, barcha mavjud statistikani olish
+            if not features:
+                # Barcha statistik ustunlarni olish
+                stat_columns = [col for col in player.index if col not in ['ID', 'Name', 'Photo', 'Flag', 'Club Logo', 'Nationality', 'Club']]
+                for col in stat_columns:
+                    if pd.notnull(player[col]) and isinstance(player[col], (int, float)):
+                        try:
+                            features[col] = float(player[col])
+                        except:
+                            pass
+
+            result.append({
+                "id": int(player['ID']),
+                "name": str(player['Name']) if pd.notnull(player['Name']) else "Unknown",
+                "type": player_type,
+                "position": position,
+                "overall": int(player['Overall']) if pd.notnull(player['Overall']) else 0,
+                "club": str(player['Club']) if pd.notnull(player['Club']) and str(player['Club']) != 'nan' else "Free Agent",
+                "nationality": str(player['Nationality']) if pd.notnull(player['Nationality']) and str(player['Nationality']) != 'nan' else "Unknown",
+                "age": int(player['Age']) if pd.notnull(player['Age']) else 0,
+                "photo": str(player['Photo']) if pd.notnull(player['Photo']) and str(player['Photo']) != 'nan' else "",
+                "features": features,
+                "key_features": field_position_features.get(position, field_features[:5]) if player_type == "field"
+                              else gk_level_features.get(position, gk_features[:5])
+            })
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "data": result
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/api/player/{player_id}")
+async def get_player_details(player_id: int):
+    """Bitta o'yinchining batafsil ma'lumotlari"""
+    try:
+        df = pd.read_csv("FIFA-2019.csv")
+
+        player = df[df['ID'] == player_id]
+        if player.empty:
+            raise HTTPException(status_code=404, detail="Player not found")
+
+        player = player.iloc[0]
+
+        # Position ni aniqlash
+        position = str(player['Position']).split(',')[0].strip() if pd.notnull(player['Position']) and str(player['Position']) != 'nan' else 'Unknown'
+        player_type = "gk" if position == "GK" else "field"
+
+        # Featurelarni yig'ish
+        features = {}
+        feature_list = field_features if player_type == "field" else gk_features
+
+        for feat in feature_list:
+            if feat in player.index and pd.notnull(player[feat]):
+                try:
+                    features[feat] = float(player[feat])
+                except:
+                    pass
+
+        # Eng kuchli 10 feature
+        top_features = sorted(features.items(), key=lambda x: x[1], reverse=True)[:10]
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "data": {
+                "id": int(player['ID']),
+                "name": str(player['Name']) if pd.notnull(player['Name']) else "Unknown",
+                "type": player_type,
+                "position": position,
+                "overall": int(player['Overall']) if pd.notnull(player['Overall']) else 0,
+                "club": str(player['Club']) if pd.notnull(player['Club']) and str(player['Club']) != 'nan' else "Free Agent",
+                "nationality": str(player['Nationality']) if pd.notnull(player['Nationality']) and str(player['Nationality']) != 'nan' else "Unknown",
+                "age": int(player['Age']) if pd.notnull(player['Age']) else 0,
+                "photo": str(player['Photo']) if pd.notnull(player['Photo']) and str(player['Photo']) != 'nan' else "",
+                "features": features,
+                "top_features": top_features,
+                "key_features": field_position_features.get(position, field_features[:5]) if player_type == "field"
+                              else gk_level_features.get(position, gk_features[:5])
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+# ==================== FEATURE IMPORTANCE ENDPOINT ====================
+@app.get("/api/feature-importance")
+async def get_feature_importance():
+    """Feature importance ma'lumotlarini qaytaradi"""
+    try:
+        # Field feature importance
+        field_importance = {}
+        if hasattr(field_model, 'feature_importances_'):
+            for i, feat in enumerate(field_features):
+                if i < len(field_model.feature_importances_):
+                    field_importance[feat] = float(field_model.feature_importances_[i])
+
+        # GK feature importance
+        gk_importance = {}
+        if hasattr(gk_model, 'feature_importances_'):
+            for i, feat in enumerate(gk_features):
+                if i < len(gk_model.feature_importances_):
+                    gk_importance[feat] = float(gk_model.feature_importances_[i])
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "data": {
+                "field": field_importance,
+                "gk": gk_importance
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+# ==================== EXPORT PLAYERS ENDPOINT ====================
+@app.post("/api/export-players")
+async def export_players(player_ids: List[int]):
+    """O'yinchilarni JSON formatida eksport qilish"""
+    try:
+        df = pd.read_csv("FIFA-2019.csv")
+        selected_players = df[df['ID'].isin(player_ids)]
+
+        if selected_players.empty:
+            raise HTTPException(status_code=404, detail="Players not found")
+
+        # JSON formatiga o'tkazish
+        result = selected_players.to_dict(orient='records')
+
+        return {
+            "status": "success",
+            "timestamp": get_timestamp(),
+            "data": result
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 # ==================== RUN SERVER ====================
 if __name__ == "__main__":
     import uvicorn

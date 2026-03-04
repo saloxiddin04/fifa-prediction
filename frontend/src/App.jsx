@@ -8,6 +8,7 @@ import StatsPanel from './components/StatsPanel';
 import Footer from './components/Footer';
 import HowToUse from './components/HowToUse';
 import './index.css';
+import PlayerComparison from "./components/PlayerComparison.jsx";
 
 function App() {
   const [prediction, setPrediction] = useState(null);
@@ -133,6 +134,9 @@ function App() {
               </div>
             </div>
           </div>
+
+          {/*Player Comparison*/}
+          <PlayerComparison />
         </div>
       </main>
 

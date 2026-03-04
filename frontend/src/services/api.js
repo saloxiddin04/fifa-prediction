@@ -36,6 +36,7 @@ api.interceptors.response.use(
   }
 );
 
+// ==================== prediction API ====================
 export const predictionAPI = {
   // Health check
   healthCheck: () => api.get('/api/health'),
@@ -51,9 +52,42 @@ export const predictionAPI = {
   
   // Predict single player
   predict: (playerData) => api.post('/api/predict', playerData),
-  
-  // Bulk predict
-  bulkPredict: (players) => api.post('/api/bulk-predict', { players }),
+};
+
+// ==================== PLAYER COMPARISON API ====================
+export const comparisonAPI = {
+  // Search players by name
+  searchPlayers: (searchTerm, limit = 50) =>
+    api.get('/api/players', { params: { search: searchTerm, limit } }),
+
+  // Get player details by ID
+  getPlayerDetails: (playerId) =>
+    api.get(`/api/player/${playerId}`),
+
+  // Compare multiple players
+  comparePlayers: (playerIds) =>
+    api.post('/api/player-comparison', playerIds),
+
+  // Get all players (with optional filters)
+  getAllPlayers: (limit = 100) =>
+    api.get('/api/players', { params: { limit } }),
+
+  // Get players by position
+  getPlayersByPosition: (position, limit = 50) =>
+    api.get('/api/players', { params: { position, limit } }),
+};
+
+// ==================== UTILITY API ====================
+export const utilityAPI = {
+  // Get all positions from CSV
+  getPositions: () => api.get('/api/positions'),
+
+  // Get feature importance
+  getFeatureImportance: () => api.get('/api/feature-importance'),
+
+  // Download player data as JSON
+  exportPlayerData: (playerIds) =>
+    api.post('/api/export-players', playerIds, { responseType: 'blob' }),
 };
 
 export default api;
