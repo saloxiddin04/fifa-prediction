@@ -229,7 +229,7 @@ const PredictionForm = ({ onPrediction, isLoading, setIsLoading }) => {
               key={sample}
               type="button"
               onClick={() => handleSampleSelect(sample)}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm capitalize transition-all"
+              className="px-4 py-2 text-black bg-gray-100 hover:bg-gray-200 rounded-lg text-sm capitalize transition-all"
             >
               {sample}
             </button>
