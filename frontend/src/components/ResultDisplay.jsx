@@ -285,104 +285,117 @@ const ResultDisplay = ({ prediction }) => {
           <FaFutbol className="text-fifa-blue mr-2" />
           <h4 className="font-medium text-gray-700">Position Details</h4>
         </div>
-        
-        {!isGK ? (
-          <div className="text-gray-700">
-            {prediction.predicted_position === 'Forward' && (
-              <div>
-                <p className="font-medium mb-2">🎯 <strong>Forward</strong> - Primary goal scorer</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Key Attributes: Finishing, Positioning, Shot Power</li>
-                  <li>Role: Score goals, create attacking opportunities</li>
-                  <li>Examples: ST (Striker), CF (Center Forward), LW/RW (Wingers)</li>
-                </ul>
+
+        {prediction?.key_features && prediction?.key_features?.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {prediction?.key_features.map((feature, idx) => (
+              <div key={idx} className="flex items-center bg-white p-2 rounded-lg shadow-sm">
+                <FaStar className="text-fifa-gold mr-2 text-sm" />
+                <span className="text-sm font-medium text-gray-700">{feature}</span>
               </div>
-            )}
-            {prediction.predicted_position === 'Midfielder' && (
-              <div>
-                <p className="font-medium mb-2">🔄 <strong>Midfielder</strong> - Game controller</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Key Attributes: Passing, Dribbling, Vision, Stamina</li>
-                  <li>Role: Link defense and attack, control tempo</li>
-                  <li>Examples: CAM (Attacking Mid), CM (Center Mid), CDM (Defensive Mid)</li>
-                </ul>
-              </div>
-            )}
-            {prediction.predicted_position === 'DefensiveMid' && (
-              <div>
-                <p className="font-medium mb-2">🛡️ <strong>Defensive Midfielder</strong> - Defensive shield</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Key Attributes: Interceptions, Tackling, Strength, Positioning</li>
-                  <li>Role: Protect defense, break up attacks</li>
-                  <li>Examples: CDM, LDM, RDM</li>
-                </ul>
-              </div>
-            )}
-            {prediction.predicted_position === 'CenterBack' && (
-              <div>
-                <p className="font-medium mb-2">🧱 <strong>Center Back</strong> - Central defender</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Key Attributes: Marking, Strength, Heading, Tackling</li>
-                  <li>Role: Prevent goals, organize defense</li>
-                  <li>Examples: CB, LCB, RCB</li>
-                </ul>
-              </div>
-            )}
-            {prediction.predicted_position === 'FullBack' && (
-              <div>
-                <p className="font-medium mb-2">🏃 <strong>Full Back</strong> - Wide defender</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Key Attributes: Pace, Crossing, Stamina, Tackling</li>
-                  <li>Role: Defend wide areas, support attacks</li>
-                  <li>Examples: LB, RB, LWB, RWB</li>
-                </ul>
-              </div>
-            )}
+            ))}
           </div>
         ) : (
-          <div className="text-gray-700">
-            {prediction.predicted_level === 'Elite' && (
-              <div>
-                <p className="font-medium mb-2">🏆 <strong>Elite Goalkeeper</strong> - World Class</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Characteristics: Exceptional reflexes, positioning, and leadership</li>
-                  <li>Suitable for: Top-tier clubs and international teams</li>
-                  <li>Overall Rating: 85+</li>
-                </ul>
-              </div>
-            )}
-            {prediction.predicted_level === 'Gold' && (
-              <div>
-                <p className="font-medium mb-2">🥇 <strong>Gold Goalkeeper</strong> - High Quality</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Characteristics: Reliable, consistent, good technical skills</li>
-                  <li>Suitable for: Professional leagues and cup competitions</li>
-                  <li>Overall Rating: 75-84</li>
-                </ul>
-              </div>
-            )}
-            {prediction.predicted_level === 'Silver' && (
-              <div>
-                <p className="font-medium mb-2">🥈 <strong>Silver Goalkeeper</strong> - Solid Professional</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Characteristics: Good fundamentals, developing skills</li>
-                  <li>Suitable for: Lower divisions and backup roles</li>
-                  <li>Overall Rating: 65-74</li>
-                </ul>
-              </div>
-            )}
-            {prediction.predicted_level === 'Bronze' && (
-              <div>
-                <p className="font-medium mb-2">🥉 <strong>Bronze Goalkeeper</strong> - Developing Talent</p>
-                <ul className="text-sm space-y-1 ml-5 list-disc">
-                  <li>Characteristics: Basic skills, potential for growth</li>
-                  <li>Suitable for: Youth teams and lower levels</li>
-                  <li>Overall Rating: Below 65</li>
-                </ul>
-              </div>
-            )}
-          </div>
+          <p className="text-gray-500">No details!</p>
         )}
+        
+        {/*{!isGK ? (*/}
+        {/*  <div className="text-gray-700">*/}
+        {/*    {prediction.predicted_position === 'Forward' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🎯 <strong>Forward</strong> - Primary goal scorer</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Key Attributes: Finishing, Positioning, Shot Power</li>*/}
+        {/*          <li>Role: Score goals, create attacking opportunities</li>*/}
+        {/*          <li>Examples: ST (Striker), CF (Center Forward), LW/RW (Wingers)</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {prediction.predicted_position === 'Midfielder' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🔄 <strong>Midfielder</strong> - Game controller</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Key Attributes: Passing, Dribbling, Vision, Stamina</li>*/}
+        {/*          <li>Role: Link defense and attack, control tempo</li>*/}
+        {/*          <li>Examples: CAM (Attacking Mid), CM (Center Mid), CDM (Defensive Mid)</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {prediction.predicted_position === 'DefensiveMid' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🛡️ <strong>Defensive Midfielder</strong> - Defensive shield</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Key Attributes: Interceptions, Tackling, Strength, Positioning</li>*/}
+        {/*          <li>Role: Protect defense, break up attacks</li>*/}
+        {/*          <li>Examples: CDM, LDM, RDM</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {prediction.predicted_position === 'CenterBack' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🧱 <strong>Center Back</strong> - Central defender</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Key Attributes: Marking, Strength, Heading, Tackling</li>*/}
+        {/*          <li>Role: Prevent goals, organize defense</li>*/}
+        {/*          <li>Examples: CB, LCB, RCB</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {prediction.predicted_position === 'FullBack' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🏃 <strong>Full Back</strong> - Wide defender</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Key Attributes: Pace, Crossing, Stamina, Tackling</li>*/}
+        {/*          <li>Role: Defend wide areas, support attacks</li>*/}
+        {/*          <li>Examples: LB, RB, LWB, RWB</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*  </div>*/}
+        {/*) : (*/}
+        {/*  <div className="text-gray-700">*/}
+        {/*    {prediction.predicted_level === 'Elite' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🏆 <strong>Elite Goalkeeper</strong> - World Class</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Characteristics: Exceptional reflexes, positioning, and leadership</li>*/}
+        {/*          <li>Suitable for: Top-tier clubs and international teams</li>*/}
+        {/*          <li>Overall Rating: 85+</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {prediction.predicted_level === 'Gold' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🥇 <strong>Gold Goalkeeper</strong> - High Quality</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Characteristics: Reliable, consistent, good technical skills</li>*/}
+        {/*          <li>Suitable for: Professional leagues and cup competitions</li>*/}
+        {/*          <li>Overall Rating: 75-84</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {prediction.predicted_level === 'Silver' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🥈 <strong>Silver Goalkeeper</strong> - Solid Professional</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Characteristics: Good fundamentals, developing skills</li>*/}
+        {/*          <li>Suitable for: Lower divisions and backup roles</li>*/}
+        {/*          <li>Overall Rating: 65-74</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {prediction.predicted_level === 'Bronze' && (*/}
+        {/*      <div>*/}
+        {/*        <p className="font-medium mb-2">🥉 <strong>Bronze Goalkeeper</strong> - Developing Talent</p>*/}
+        {/*        <ul className="text-sm space-y-1 ml-5 list-disc">*/}
+        {/*          <li>Characteristics: Basic skills, potential for growth</li>*/}
+        {/*          <li>Suitable for: Youth teams and lower levels</li>*/}
+        {/*          <li>Overall Rating: Below 65</li>*/}
+        {/*        </ul>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </motion.div>
     </motion.div>
   );

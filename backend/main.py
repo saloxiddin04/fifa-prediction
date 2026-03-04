@@ -75,6 +75,81 @@ def validate_features(features, expected_count, player_type):
                 detail=f"Feature {i} must be between 0-100, got {feature}"
             )
 
+# ==================== KEY FEATURES NI CSV DAN HISOBLASH ====================
+print("📂 CSV dan key features hisoblanmoqda...")
+field_position_features = {}   # pozitsiya -> eng muhim atributlar ro‘yxati
+gk_level_features = {}         # darvozabon darajasi -> eng muhim atributlar
+
+try:
+    # CSV fayl yo‘li – loyiha ildizidagi FIFA-2019.csv
+    df = pd.read_csv("FIFA-2019.csv")
+
+    # ----- Maydon o‘yinchilari uchun -----
+    field_positions = metadata.get('field_classes', [])
+    df_field = df[df['Position'].isin(field_positions)].copy()
+
+    if not df_field.empty:
+        for pos in field_positions:
+            pos_df = df_field[df_field['Position'] == pos]
+            if not pos_df.empty:
+                # field_features ro‘yxatidagi ustunlar bo‘yicha o‘rtacha hisoblaymiz
+                means = pos_df[field_features].mean().sort_values(ascending=False)
+                top_features = means.head(5).index.tolist()
+                field_position_features[pos] = top_features
+            else:
+                # Agar pozitsiya bo‘yicha ma’lumot topilmasa, hamma field_features dan birinchi 5 tasini olamiz
+                field_position_features[pos] = field_features[:5]
+    else:
+        # Agar CSV da hech qanday maydon o‘yinchisi bo‘lmasa, hamma pozitsiyalar uchun bir xil
+        for pos in field_positions:
+            field_position_features[pos] = field_features[:5]
+
+    # ----- Darvozabonlar uchun -----
+    # CSV da darvozabonlar darajasi (Elite, Gold, Silver, Bronze) qandaydir ustunda saqlangan bo‘lishi kerak.
+    # Misol uchun "Level" ustuni bor deb faraz qilamiz. Agar yo‘q bo‘lsa, Overall bo‘yicha darajalarni aniqlash mumkin.
+    if 'Level' in df.columns:
+        gk_levels = ['Elite', 'Gold', 'Silver', 'Bronze']
+        df_gk = df[df['Level'].isin(gk_levels)]
+        for level in gk_levels:
+            level_df = df_gk[df_gk['Level'] == level]
+            if not level_df.empty:
+                means = level_df[gk_features].mean().sort_values(ascending=False)
+                top_features = means.head(5).index.tolist()
+                gk_level_features[level] = top_features
+            else:
+                gk_level_features[level] = gk_features[:5]
+    else:
+        # Agar Level ustuni bo‘lmasa, Overall asosida darajalarni yaratish mumkin
+        # (bu qismni sizning modelingizga moslab o‘zgartirishingiz mumkin)
+        # Yoki oddiygina hamma uchun bir xil atributlarni qaytarish mumkin:
+        gk_level_features = {
+            "Elite": gk_features[:5],
+            "Gold": gk_features[:5],
+            "Silver": gk_features[:5],
+            "Bronze": gk_features[:5]
+        }
+
+    print("✅ Key features CSV dan muvaffaqiyatli hisoblandi.")
+
+except Exception as e:
+    print(f"⚠️ CSV ni yuklashda xatolik: {e}")
+    print("Fallback (statik) ma'lumotlar ishlatiladi.")
+    # Xatolik yuz berganda eski statik ma'lumotlarni ishlatamiz
+    field_position_features = {
+        "Forward": ["Finishing", "Positioning", "ShotPower", "Acceleration", "BallControl"],
+        "Winger": ["Crossing", "Dribbling", "Pace", "Agility", "BallControl"],
+        "Midfielder": ["ShortPassing", "Dribbling", "Vision", "BallControl", "Stamina"],
+        "DefensiveMid": ["Interceptions", "StandingTackle", "Strength", "Aggression", "Stamina"],
+        "CenterBack": ["Marking", "StandingTackle", "HeadingAccuracy", "Strength", "Composure"],
+        "FullBack": ["Acceleration", "Crossing", "Stamina", "StandingTackle", "Marking"]
+    }
+    gk_level_features = {
+        "Elite": ["GKReflexes", "GKPositioning", "GKDiving", "GKHandling", "GKKicking"],
+        "Gold": ["GKReflexes", "GKPositioning", "GKDiving", "GKHandling", "Speed"],
+        "Silver": ["GKReflexes", "GKHandling", "GKDiving", "GKPositioning", "Strength"],
+        "Bronze": ["GKReflexes", "GKHandling", "GKDiving", "Speed", "Strength"]
+    }
+
 # ==================== API ENDPOINTS ====================
 @app.get("/")
 async def root():
@@ -162,6 +237,13 @@ async def predict(request: PredictionRequest):
                     "position": label_encoder.classes_[idx],
                     "probability": float(probabilities[idx])
                 })
+
+            position = label_encoder.inverse_transform([prediction])[0]
+            # CSV dan hisoblangan key features ni olish
+            key_features = field_position_features.get(
+               position,
+               field_features[:5] # agar topilmasa, birinchi 5 atribut
+            )
             
             # Prepare response
             response = {
@@ -173,7 +255,8 @@ async def predict(request: PredictionRequest):
                 "all_probabilities": dict(zip(
                     label_encoder.classes_, 
                     [float(p) for p in probabilities]
-                ))
+                )),
+                "key_features": key_features
             }
             
         elif request.type == "gk":
@@ -196,6 +279,12 @@ async def predict(request: PredictionRequest):
                     "level": gk_model.classes_[idx],
                     "probability": float(probabilities[idx])
                 })
+
+            level = prediction   # masalan "Elite"
+            key_features = gk_level_features.get(
+	            level,
+	            gk_features[:5]
+            )
             
             # Prepare response
             response = {
@@ -207,7 +296,8 @@ async def predict(request: PredictionRequest):
                 "all_probabilities": dict(zip(
                     gk_model.classes_, 
                     [float(p) for p in probabilities]
-                ))
+                )),
+                "key_features": key_features
             }
         
         else:
