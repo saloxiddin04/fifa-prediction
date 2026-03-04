@@ -110,29 +110,6 @@ function App() {
                 View Detailed Guide
               </button>
             </div>
-
-            {/* Model Info */}
-            <div className="card">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Model Information</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Field Model Accuracy</span>
-                  <span className="font-bold text-green-600">76.5%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">GK Model Accuracy</span>
-                  <span className="font-bold text-purple-600">96.3%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Training Samples</span>
-                  <span className="font-bold">18,147</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Features Used</span>
-                  <span className="font-bold">29</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/*Player Comparison*/}

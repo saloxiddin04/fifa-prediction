@@ -438,8 +438,7 @@ async def get_positions():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading positions: {str(e)}")
 
-# ==================== PLAYER ENDPOINTS (TO'LIQ) ====================
-
+# ==================== PLAYER ENDPOINTS ====================
 @app.get("/api/players")
 async def get_players(
     search: Optional[str] = None,
@@ -517,40 +516,6 @@ async def get_top_players(limit: int = 100):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading top players: {str(e)}")
-
-@app.get("/api/players/position/{position}")
-async def get_players_by_position(position: str, limit: int = 50):
-    """Pozitsiya bo'yicha o'yinchilarni olish"""
-    try:
-        df = pd.read_csv("FIFA-2019.csv")
-
-        # Position ni tozalash
-        df['MainPosition'] = df['Position'].apply(
-            lambda x: str(x).split(',')[0].strip() if pd.notnull(x) and str(x) != 'nan' else 'Unknown'
-        )
-
-        # Pozitsiya bo'yicha filter
-        players = df[df['MainPosition'] == position]
-
-        # Kerakli ustunlarni tanlash
-        players = players[['ID', 'Name', 'Age', 'Overall', 'Position', 'Club', 'Nationality', 'Photo']].copy()
-
-        # Null qiymatlarni tozalash
-        players = players.dropna(subset=['Name', 'Overall'])
-
-        # Overall bo'yicha tartiblash va limit
-        players = players.nlargest(limit, 'Overall')
-
-        return {
-            "status": "success",
-            "timestamp": get_timestamp(),
-            "position": position,
-            "count": len(players),
-            "data": players.to_dict(orient='records')
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading players by position: {str(e)}")
 
 @app.post("/api/player-comparison")
 async def get_player_comparison(player_ids: List[int]):

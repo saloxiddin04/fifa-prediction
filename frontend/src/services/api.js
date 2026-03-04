@@ -75,6 +75,8 @@ export const comparisonAPI = {
   // Get players by position
   getPlayersByPosition: (position, limit = 50) =>
     api.get('/api/players', { params: { position, limit } }),
+
+  getTopPlayers: (limit = 50) => api.get("/api/players/top", {params: {limit}})
 };
 
 // ==================== UTILITY API ====================
