@@ -211,108 +211,210 @@ async def get_features():
         }
     }
 
+# @app.post("/api/predict")
+# async def predict(request: PredictionRequest):
+#     try:
+#         if request.type == "field":
+#             # Validate feature count
+#             validate_features(request.features, len(field_features), "field")
+#
+#             # Scale features
+#             features_array = np.array(request.features).reshape(1, -1)
+#             scaled_features = field_scaler.transform(features_array)
+#
+#             # Predict
+#             prediction = field_model.predict(scaled_features)[0]
+#             probabilities = field_model.predict_proba(scaled_features)[0]
+#
+#             # Decode position
+#             position = label_encoder.inverse_transform([prediction])[0]
+#
+#             # Get top 3 predictions
+#             top_indices = probabilities.argsort()[-3:][::-1]
+#             top_predictions = []
+#             for idx in top_indices:
+#                 top_predictions.append({
+#                     "position": label_encoder.classes_[idx],
+#                     "probability": float(probabilities[idx])
+#                 })
+#
+#             position = label_encoder.inverse_transform([prediction])[0]
+#             # CSV dan hisoblangan key features ni olish
+#             key_features = field_position_features.get(
+#                position,
+#                field_features[:5] # agar topilmasa, birinchi 5 atribut
+#             )
+#
+#             # Prepare response
+#             response = {
+#                 "player_type": "field",
+#                 "predicted_position": position,
+#                 "probability": float(probabilities[prediction]),
+#                 "confidence": "high" if probabilities[prediction] > 0.7 else "medium" if probabilities[prediction] > 0.5 else "low",
+#                 "top_predictions": top_predictions,
+#                 "all_probabilities": dict(zip(
+#                     label_encoder.classes_,
+#                     [float(p) for p in probabilities]
+#                 )),
+#                 "key_features": key_features
+#             }
+#
+#         elif request.type == "gk":
+#             # Validate feature count
+#             validate_features(request.features, len(gk_features), "goalkeeper")
+#
+#             # Scale features
+#             features_array = np.array(request.features).reshape(1, -1)
+#             scaled_features = gk_scaler.transform(features_array)
+#
+#             # Predict
+#             prediction = gk_model.predict(scaled_features)[0]
+#             probabilities = gk_model.predict_proba(scaled_features)[0]
+#
+#             # Get top 3 predictions (indekslarni int ga o‘tkazamiz)
+#             top_indices = probabilities.argsort()[-3:][::-1]
+#             top_predictions = []
+#             for idx in top_indices:
+#                 idx = int(idx)   # <-- MUHIM: numpy int ni python int ga o‘tkazish
+#                 top_predictions.append({
+#                     "level": gk_model.classes_[idx],
+#                     "probability": float(probabilities[idx])
+#                 })
+#
+#             level = prediction
+#             # level ni ham int ga o‘tkazish shart emas, u allaqachon int
+#             key_features = gk_level_features.get(
+#                 level,
+#                 gk_features[:5]
+#             )
+#
+#             response = {
+#                 "player_type": "goalkeeper",
+#                 "predicted_level": prediction,
+#                 "probability": float(probabilities[int(prediction)]),   # <-- bu ham xavfsiz
+#                 "confidence": "high" if probabilities[int(prediction)] > 0.7 else "medium" if probabilities[int(prediction)] > 0.5 else "low",
+#                 "top_predictions": top_predictions,
+#                 "all_probabilities": dict(zip(
+#                     gk_model.classes_,
+#                     [float(p) for p in probabilities]
+#                 )),
+#                 "key_features": key_features
+#             }
+#
+#         else:
+#             raise HTTPException(status_code=400, detail="Player type must be 'field' or 'gk'")
+#
+#         # Add name if provided
+#         if request.name:
+#             response["player_name"] = request.name
+#
+#         return {
+#             "status": "success",
+#             "timestamp": get_timestamp(),
+#             "data": response
+#         }
+#
+#     except HTTPException:
+#         raise
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 @app.post("/api/predict")
 async def predict(request: PredictionRequest):
     try:
         if request.type == "field":
             # Validate feature count
             validate_features(request.features, len(field_features), "field")
-            
+
             # Scale features
             features_array = np.array(request.features).reshape(1, -1)
             scaled_features = field_scaler.transform(features_array)
-            
+
             # Predict
-            prediction = field_model.predict(scaled_features)[0]
+            prediction_idx = field_model.predict(scaled_features)[0]   # indeks (int)
             probabilities = field_model.predict_proba(scaled_features)[0]
-            
-            # Decode position
-            position = label_encoder.inverse_transform([prediction])[0]
-            
+
+            # Decode position (matn)
+            position = label_encoder.inverse_transform([prediction_idx])[0]
+
             # Get top 3 predictions
             top_indices = probabilities.argsort()[-3:][::-1]
             top_predictions = []
             for idx in top_indices:
+                idx = int(idx)
                 top_predictions.append({
                     "position": label_encoder.classes_[idx],
                     "probability": float(probabilities[idx])
                 })
 
-            position = label_encoder.inverse_transform([prediction])[0]
-            # CSV dan hisoblangan key features ni olish
-            key_features = field_position_features.get(
-               position,
-               field_features[:5] # agar topilmasa, birinchi 5 atribut
-            )
-            
-            # Prepare response
+            # Ehtimolliklarni klass nomlari bilan bog‘lash
+            prob_dict = dict(zip(label_encoder.classes_, probabilities))
+            prob_of_predicted = prob_dict[position]
+
+            # Key features
+            key_features = field_position_features.get(position, field_features[:5])
+
             response = {
                 "player_type": "field",
                 "predicted_position": position,
-                "probability": float(probabilities[prediction]),
-                "confidence": "high" if probabilities[prediction] > 0.7 else "medium" if probabilities[prediction] > 0.5 else "low",
+                "probability": float(prob_of_predicted),
+                "confidence": "high" if prob_of_predicted > 0.7 else "medium" if prob_of_predicted > 0.5 else "low",
                 "top_predictions": top_predictions,
-                "all_probabilities": dict(zip(
-                    label_encoder.classes_, 
-                    [float(p) for p in probabilities]
-                )),
+                "all_probabilities": dict(zip(label_encoder.classes_, [float(p) for p in probabilities])),
                 "key_features": key_features
             }
-            
+
         elif request.type == "gk":
             # Validate feature count
             validate_features(request.features, len(gk_features), "goalkeeper")
-            
+
             # Scale features
             features_array = np.array(request.features).reshape(1, -1)
             scaled_features = gk_scaler.transform(features_array)
-            
-            # Predict
-            prediction = gk_model.predict(scaled_features)[0]
+
+            # Predict (to'g'ridan-to'g'ri klass nomi – masalan 'Elite')
+            predicted_level = gk_model.predict(scaled_features)[0]
             probabilities = gk_model.predict_proba(scaled_features)[0]
-            
+
             # Get top 3 predictions
             top_indices = probabilities.argsort()[-3:][::-1]
             top_predictions = []
             for idx in top_indices:
+                idx = int(idx)
                 top_predictions.append({
                     "level": gk_model.classes_[idx],
                     "probability": float(probabilities[idx])
                 })
 
-            level = prediction   # masalan "Elite"
-            key_features = gk_level_features.get(
-	            level,
-	            gk_features[:5]
-            )
-            
-            # Prepare response
+            # Ehtimolliklarni klass nomlari bilan bog‘lash
+            prob_dict = dict(zip(gk_model.classes_, probabilities))
+            prob_of_predicted = prob_dict[predicted_level]
+
+            # Key features
+            key_features = gk_level_features.get(predicted_level, gk_features[:5])
+
             response = {
                 "player_type": "goalkeeper",
-                "predicted_level": prediction,
-                "probability": float(probabilities[prediction]),
-                "confidence": "high" if probabilities[prediction] > 0.7 else "medium" if probabilities[prediction] > 0.5 else "low",
+                "predicted_level": predicted_level,
+                "probability": float(prob_of_predicted),
+                "confidence": "high" if prob_of_predicted > 0.7 else "medium" if prob_of_predicted > 0.5 else "low",
                 "top_predictions": top_predictions,
-                "all_probabilities": dict(zip(
-                    gk_model.classes_, 
-                    [float(p) for p in probabilities]
-                )),
+                "all_probabilities": dict(zip(gk_model.classes_, [float(p) for p in probabilities])),
                 "key_features": key_features
             }
-        
+
         else:
             raise HTTPException(status_code=400, detail="Player type must be 'field' or 'gk'")
-        
-        # Add name if provided
+
         if request.name:
             response["player_name"] = request.name
-        
+
         return {
             "status": "success",
             "timestamp": get_timestamp(),
             "data": response
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
